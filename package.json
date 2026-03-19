@@ -1,0 +1,15 @@
+{
+  "name": "fishing-auto-bot",
+  "version": "1.0.0",
+  "description": "낚시 이슈 자동 수집 및 인스타그램 포스팅 봇",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "@google/generative-ai": "^0.1.0"
+  }
+}
