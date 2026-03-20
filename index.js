@@ -20,7 +20,7 @@ async function main() {
     const caption = await ai.generateInstagramContent(data);
     console.log('캡션 생성 완료:\n', caption);
 
-    const imageUrl = "https://images.unsplash.com/photo-1529230117712-640ff21efffd?auto=format&fit=crop&q=80&w=1000";
+    const imageUrl = "https://images.unsplash.com/photo-1529230117712-640ff21efffd?w=1080&q=80&fm=jpg";
 
     if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID) {
         const publisher = new InstagramPublisher(
@@ -31,8 +31,6 @@ async function main() {
         const result = await publisher.publishPost(imageUrl, caption);
         console.log('🎉 업로드 성공! ID:', result.id);
     }
-
-    console.log('--- 작업 완료 ---');
 }
 
 main().catch(err => {
