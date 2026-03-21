@@ -13,12 +13,12 @@ async function main() {
     const caption = await ai.generateInstagramContent(data);
     console.log('캡션 생성 완료.');
 
-    // 1:1 정사각형 비율로 강제 지정된 이미지 주소입니다 (화면 비율 에러 해결)
-    const imageUrl = "https://images.pexels.com/photos/2133991/pexels-photo-2133991.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000";
+    // 이제 '산속 도로'가 아닌 '진짜 낚시 사진' 주소입니다! (1:1 정사각형)
+    const imageUrl = "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000";
 
     const publisher = new InstagramPublisher(process.env.INSTAGRAM_ACCESS_TOKEN, process.env.INSTAGRAM_USER_ID);
     console.log('인스타그램 업로드 중...');
     const result = await publisher.publishPost(imageUrl, caption);
-    console.log('🎉 드디어 성공! 포스팅 ID:', result.id);
+    console.log('🎉 축하드립니다! 진짜 낚시 포스팅 성공! ID:', result.id);
 }
 main().catch(err => { console.error('에러:', err); process.exit(1); });
