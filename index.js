@@ -13,13 +13,14 @@ async function main() {
     const caption = await ai.generateInstagramContent(data);
     console.log('캡션 생성 완료.');
 
-    const imageUrl = "https://images.unsplash.com/photo-1529230117712-640ff21efffd?w=1000&q=80&fm=jpg";
+    // 인스타그램이 가장 좋아하는 직접 링크 방식의 사진으로 교체
+    const imageUrl = "https://images.pexels.com/photos/2133991/pexels-photo-2133991.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
 
     if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID) {
         const publisher = new InstagramPublisher(process.env.INSTAGRAM_ACCESS_TOKEN, process.env.INSTAGRAM_USER_ID);
         console.log('인스타그램 업로드 중...');
         const result = await publisher.publishPost(imageUrl, caption);
-        console.log('🎉 최종 업로드 성공! ID:', result.id);
+        console.log('🎉 드디어 성공! 포스팅 ID:', result.id);
     }
 }
 
