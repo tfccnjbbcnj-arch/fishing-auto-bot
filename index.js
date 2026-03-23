@@ -22,13 +22,13 @@ async function main() {
     const caption = await ai.generateInstagramContent(data);
     console.log('캡션 생성 완료:\n', caption);
 
-    // 3. 사진 선정 (랜덤 이미지 리스트 활용)
+    // 3. 사진 선정 (더 구체적인 낚시 관련 이미지 리스트)
     const fishingImages = [
-        "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 방파제 낚시
-        "https://images.pexels.com/photos/2131908/pexels-photo-2131908.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 보트 낚시
-        "https://images.pexels.com/photos/1143926/pexels-photo-1143926.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 호수 낚시
-        "https://images.pexels.com/photos/731706/pexels-photo-731706.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",   // 일몰 낚시
-        "https://images.pexels.com/photos/1651475/pexels-photo-1651475.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000"  // 플라이 낚시
+        "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 바다 바위 위 낚시꾼
+        "https://images.pexels.com/photos/2288107/pexels-photo-2288107.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 다리 위 낚시꾼
+        "https://images.pexels.com/photos/2131910/pexels-photo-2131910.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 잡힌 물고기와 낚싯바늘 (클로즈업)
+        "https://images.pexels.com/photos/206064/pexels-photo-206064.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",    // 낚시 릴과 장비
+        "https://images.pexels.com/photos/294674/pexels-photo-294674.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000"     // 다양한 루어와 미끼
     ];
     const randomImage = fishingImages[Math.floor(Math.random() * fishingImages.length)];
     const imageUrl = process.env.DEFAULT_IMAGE_URL || randomImage;
