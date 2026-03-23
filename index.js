@@ -4,7 +4,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 /**
- * 1. 낚시 데이터 수집 클래스 (네이버 + 다음 뉴스 교차 수집)
+ * 1. 낚시 데이터 수집 클래스
  */
 class FishingScraper {
     async fetchLatestFishingNews() {
@@ -14,7 +14,7 @@ class FishingScraper {
             const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
             const encodedKeyword = encodeURIComponent(randomKeyword);
             
-            // 네이버 뉴스 시도
+            // 네이버 뉴스
             const naverUrl = `https://search.naver.com/search.naver?where=news&query=${encodedKeyword}&sort=1`;
             const naverRes = await axios.get(naverUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
             const $naver = cheerio.load(naverRes.data);
@@ -22,7 +22,7 @@ class FishingScraper {
                 if (i < 3) newsItems.push({ title: $naver(el).text().trim(), link: $naver(el).attr('href') });
             });
 
-            // 데이터가 없으면 다음 뉴스 시도
+            // 다음 뉴스 (백업)
             if (newsItems.length === 0) {
                 const daumUrl = `https://search.daum.net/search?w=news&q=${encodedKeyword}`;
                 const daumRes = await axios.get(daumUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -31,44 +31,43 @@ class FishingScraper {
                     if (i < 3) newsItems.push({ title: $daum(el).text().trim(), link: $daum(el).attr('href') });
                 });
             }
-            console.log(`[뉴스수집] 총 ${newsItems.length}건 수집됨`);
+            console.log(`[뉴스] ${randomKeyword} 키워드로 ${newsItems.length}건 발견`);
             return newsItems;
-        } catch (error) { 
-            console.error('[뉴스수집 에러]:', error.message);
-            return []; 
-        }
+        } catch (error) { return []; }
     }
 }
 
 /**
- * 2. AI 콘텐츠 생성 클래스 (모델명 수정 및 로직 강화)
+ * 2. AI 콘텐츠 생성 클래스
  */
 class FishingAI {
     constructor(apiKey) { this.genAI = new GoogleGenerativeAI(apiKey); }
     async generateInstagramContent(data) {
         try {
-            // gemini-1.5-flash-latest 대신 gemini-1.5-flash 사용 (404 방지)
+            // 모델명을 gemini-1.5-flash로 고정 (404 에러 해결)
             const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const prompt = `
             정보: ${JSON.stringify(data, null, 2)}
-            위 정보를 바탕으로 인스타그램 게시물을 정성스럽게 작성해줘.
+            매우 중요: 아래 가이드에 따라 인스타그램 게시물을 정성스럽게 작성해줘.
             
-            1. 분량: 본문 내용을 7줄 이상의 장문으로 상세하게 작성.
-            2. 내용: 주제 '${data.randomTopic}'에 대해 베테랑 낚시꾼으로서 조언을 해줘.
-            3. 뉴스 정보가 있다면 같이 언급해주고, 없어도 주제 중심의 유익한 글을 써줘.
-            4. 해시태그 20개 포함. 오직 [Caption] 내용만 출력.
+            1. 주제: 오늘은 특별히 '${data.randomTopic}'에 대해 자세히 다룰 거야.
+            2. 분량: 10줄 이상의 아주 상세하고 풍부한 내용으로 작성해줘. (준비과정부터 팁까지)
+            3. 뉴스: 만약 수집된 뉴스가 있다면 자연스럽게 언급하고, 없다면 주제에 집중해줘.
+            4. 말투: 듬직한 베테랑 낚시꾼 스타일.
+            5. 해시태그 15개 이상. 오직 [Caption] 내용만 출력.
             `;
             const result = await model.generateContent(prompt);
             return result.response.text();
         } catch (error) { 
-            console.error('[AI생성 에러]:', error.message);
-            return `오늘의 낚시 정보! 🎣\n\n${data.randomTopic}에 대해 알아보는 시간입니다. 낚시는 준비 과정부터가 즐거움이죠. 오늘도 안전하고 즐거운 출조 되시길 응원합니다!\n\n#낚시 #바다낚시 #낚시꾼 #낚스타그램 #도시어부 #루어낚시 #대물기원 #생활낚시 #취미생활 #낚시포인트 #바다 #민물낚시 #붕어낚시 #캠낚 #힐링`;
+            console.error('[AI에러]:', error.message);
+            // 최후의 수단: 전형적인 답변 방지를 위해 주제별 수동 응답
+            return `오늘의 낚시 꿀팁! 🎣\n\n오늘은 '${data.randomTopic}'에 대해 깊이 있게 알아볼까요? 낚시의 진정한 매력은 역시 기다림과 채비를 준비하는 설렘이죠. 포인트 선정부터 물때 체크까지 꼼꼼히 하셔서 대물 손맛 꼭 보시길 바랍니다!\n\n#낚시 #바다낚시 #낚시꾼 #낚스타그램 #대물기원 #생활낚시 #도시어부 #루어낚시 #힐링 #민물낚시 #붕어낚시 #캠낚`;
         }
     }
 }
 
 /**
- * 3. 인stagram 업로드 클래스
+ * 3. 인스타그램 업로드 클래스
  */
 class InstagramPublisher {
     constructor(accessToken, igUserId) {
@@ -81,50 +80,52 @@ class InstagramPublisher {
                 image_url: imageUrl, caption: caption, access_token: this.accessToken
             });
             const creationId = res.data.id;
-            console.log('--- 인스타그램 서버 처리 대기 (20초) ---');
+            console.log('--- 미디어 준비 중 (20초 대기) ---');
             await new Promise(resolve => setTimeout(resolve, 20000));
             const publish = await axios.post(`${this.baseUrl}/${this.igUserId}/media_publish`, {
                 creation_id: creationId, access_token: this.accessToken
             });
             return publish.data;
-        } catch (error) { 
-            console.error('[인스타 업로드 에러]:', error.response?.data || error.message); 
-            throw error; 
-        }
+        } catch (error) { console.error('[업로드에러]:', error.response?.data || error.message); throw error; }
     }
 }
 
 /**
- * 4. 메인 실행 함수
+ * 4. 메인 실행 함수 (주제-이미지 매칭 도입)
  */
 async function main() {
-    console.log('--- [버전 4.0] 낚시 자동화 봇 최종 가동 ---');
+    console.log('--- [버전 4.1] 낚시 자동화 봇 (주제 최적화 버전) 가동 ---');
     if (!process.env.GEMINI_API_KEY) { console.error('API 키 누락!'); return; }
     
     const scraper = new FishingScraper();
     const news = await scraper.fetchLatestFishingNews();
-    const dailyTopics = [
-        "겨울철 대어 낚는 비법과 장비 셋팅", "입문자를 위한 민물 채비와 포인트 선정", 
-        "낚싯대와 릴의 수명을 늘리는 관리 기술", "물때 보는 법과 피크타임 찾는 법",
-        "손맛 찌릿하게 느끼는 어종별 챔질 타이밍", "낚시 매듭법 튼튼한 베스트 3가지"
+    
+    // 주제와 어울리는 이미지 주소를 미리 매칭
+    const topicPool = [
+        { topic: "겨울철 대어 낚는 비법과 장비 셋팅", img: "https://images.pexels.com/photos/2131910/pexels-photo-2131910.jpeg" }, // 대어
+        { topic: "입문자를 위한 민물낚시 채비와 포인트 선정", img: "https://images.pexels.com/photos/1143926/pexels-photo-1143926.jpeg" }, // 민물
+        { topic: "낚싯대와 릴의 수명을 늘리는 관리 기술", img: "https://images.pexels.com/photos/206064/pexels-photo-206064.jpeg" }, // 장비
+        { topic: "서해안/동해안 물때 보는 법과 황금 피크타임", img: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=1080&auto=format&fit=crop" }, // 물때/바다
+        { topic: "어종별 챔질 타이밍과 손맛 느끼는 법", img: "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg" }, // 액션/손맛
+        { topic: "낚시꾼이 꼭 알아야 할 튼튼한 매듭법", img: "https://images.pexels.com/photos/2131911/pexels-photo-2131911.jpeg" } // 매듭/소품
     ];
-    const randomTopic = dailyTopics[Math.floor(Math.random() * dailyTopics.length)];
-    const data = { news, randomTopic };
+    
+    const selected = topicPool[Math.floor(Math.random() * topicPool.length)];
+    const data = { news, randomTopic: selected.topic };
 
     const ai = new FishingAI(process.env.GEMINI_API_KEY);
+    console.log(`[분석] 오늘의 주제: ${selected.topic}`);
     const caption = await ai.generateInstagramContent(data);
-    console.log('[게시글 생성 완료]');
 
-    // 🎣 인스타그램 크롤러가 가장 잘 인식하는 LoremFlickr 사용 (낚시 전용 사진)
-    // LoremFlickr는 Meta 크롤러의 차단 우려가 적고 항상 유효한 이미지를 반환합니다.
-    const imageUrl = `https://loremflickr.com/1080/1080/fishing,fisherman,fish/all?lock=${Date.now()}`;
-    console.log('업로드 시도 이미지 주소:', imageUrl);
+    // 인스타그램 크롤러가 잘 인식하는 직접적인 주소 사용
+    const imageUrl = selected.img;
+    console.log('주제 맞춤형 이미지 사용:', imageUrl);
 
     if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID) {
         const publisher = new InstagramPublisher(process.env.INSTAGRAM_ACCESS_TOKEN, process.env.INSTAGRAM_USER_ID);
         await publisher.publishPost(imageUrl, caption);
-        console.log('--- 모든 작업 성공! 버전 4.0 완료 ---');
+        console.log('--- 성공! 버전 4.1 작업 완료 ---');
     }
 }
 
-main().catch(err => { console.error('최종 실패:', err.message); process.exit(1); });
+main().catch(err => { console.error('최종에러:', err.message); process.exit(1); });
