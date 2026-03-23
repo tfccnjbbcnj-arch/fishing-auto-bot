@@ -41,17 +41,18 @@ class FishingAI {
     async generateInstagramContent(data) {
         try {
             const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-            const styles = ["유머러스한 어부", "진중한 프로 낚시꾼", "열정적인 낚시광", "감성적인 도시어부"];
+            const styles = ["유머러스한 어부", "진중한 프로 낚시꾼", "열정적인 낚시광", "감성적인 도시어부", "재치 있는 낚시 인플루언서"];
             const randomStyle = styles[Math.floor(Math.random() * styles.length)];
             const prompt = `
             정보: ${JSON.stringify(data, null, 2)}
             위 정보를 바탕으로 인스타그램 게시물을 작성해줘.
             1. 컨셉: ${randomStyle} 스타일.
-            2. 내용: 뉴스 요약 또는 주제 '${data.randomTopic}'에 대한 조언.
+            2. 내용: 뉴스 요약 또는 주제 '${data.randomTopic}'에 대한 유익하고 재미있는 이야기.
             3. 매번 다른 표현 사용, 해시태그 15개 포함. [Caption] 만 출력.
             `;
             const result = await model.generateContent(prompt);
-            return result.response.text();
+            const response = await result.response;
+            return response.text();
         } catch (error) {
             return "오늘도 대물 낚으러 떠나볼까요? 🎣 #낚시 #바다낚시 #낚스타그램 #대물기원";
         }
@@ -94,7 +95,7 @@ async function main() {
     const scraper = new FishingScraper();
     const news = await scraper.fetchLatestFishingNews();
     
-    const dailyTopics = ["낚싯대 관리법", "초보 채비 추천", "낚시 매듭법", "물때 보는 법", "손맛 좋은 어종"];
+    const dailyTopics = ["겨울 대어 낚는 비법", "낚싯대 관리 꿀팁", "초보 채비 추천", "낚시 매듭법", "물때 보는 법 기초", "손맛 좋은 어종"];
     const randomTopic = dailyTopics[Math.floor(Math.random() * dailyTopics.length)];
     const data = { news, randomTopic };
 
@@ -103,13 +104,15 @@ async function main() {
     console.log('캡션 생성 완료.');
 
     const fishingImages = [
-        "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",
-        "https://images.pexels.com/photos/2288107/pexels-photo-2288107.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",
-        "https://images.pexels.com/photos/2131910/pexels-photo-2131910.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",
-        "https://images.pexels.com/photos/206064/pexels-photo-206064.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",
-        "https://images.pexels.com/photos/294674/pexels-photo-294674.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000"
+        "https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 낚시꾼
+        "https://images.pexels.com/photos/2288107/pexels-photo-2288107.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 낚시하는 사람
+        "https://images.pexels.com/photos/731706/pexels-photo-731706.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000",   // 평화로운 낚시 (노을)
+        "https://images.pexels.com/photos/1113926/pexels-photo-1113926.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000", // 찌(낚시 도구)
+        "https://images.pexels.com/photos/206064/pexels-photo-206064.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1000&w=1000"     // 낚시 릴과 장비
     ];
-    const imageUrl = fishingImages[new Date().getSeconds() % fishingImages.length];
+    // 랜덤 이미지 선택 및 환경변수(DEFAULT_IMAGE_URL)가 있을 경우 우선 사용
+    const randomImage = fishingImages[new Date().getSeconds() % fishingImages.length];
+    const imageUrl = process.env.DEFAULT_IMAGE_URL || randomImage;
 
     if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID) {
         const publisher = new InstagramPublisher(process.env.INSTAGRAM_ACCESS_TOKEN, process.env.INSTAGRAM_USER_ID);
